@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WuTape — Producer Portfolio</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts & Pretendard -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@500;600;700&family=Roboto+Slab:wght@700;800&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              DEFAULT: '#344E2D',
+              dark: '#24381E',
+              light: '#45663C',
+            },
+            paper: {
+              DEFAULT: '#F8F8F7',
+              pure: '#FFFFFF',
+              warm: '#EFEFED',
+            },
+            ink: {
+              DEFAULT: '#111111',
+              charcoal: '#222222',
+              muted: '#555555',
+              taupe: '#9A9690',
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            condensed: ['Oswald', 'Anton', 'sans-serif'],
+            slab: ['Roboto Slab', 'serif'],
+            tech: ['Space Grotesk', 'sans-serif'],
+            mono: ['Space Mono', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Base Reset & Full-Viewport Lock */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #111111;
+      font-family: 'Pretendard', 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    /* Slide Deck Container & Smooth Vertical Transitions */
+    #deck-track {
+      width: 100vw;
+      height: 500vh;
+      transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Outlined Hollow Typography for "About me" */
+    .text-outline-white {
+      color: transparent;
+      -webkit-text-stroke: 2px rgba(255, 255, 255, 0.92);
+      font-family: 'Roboto Slab', serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 0.95;
+    }
+
+    @media (min-width: 768px) {
+      .text-outline-white {
+        -webkit-text-stroke: 2.5px rgba(255, 255, 255, 0.95);
+      }
+    }
+
+    /* Staggered Entrance Motion System */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--d, 0ms);
+      will-change: opacity, transform;
+    }
+
+    .reveal-scale {
+      opacity: 0;
+      transform: scale(0.92) translateY(16px);
+      transition:
+        opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--d, 0ms);
+      will-change: opacity, transform;
+    }
+
+    .reveal-line {
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      transition-delay: var(--d, 0ms);
+      will-change: transform;
+    }
+
+    /* Active Slide State Triggers Staggered Entrances */
+    .slide.is-active .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide.is-active .reveal-scale {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .slide.is-active .reveal-line {
+      transform: scaleX(1);
+    }
+
+    /* Subtle Ambient Animations */
+    @keyframes slowSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .animate-spin-slow {
+      animation: slowSpin 36s linear infinite;
+    }
+
+    @keyframes pulseRing {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+
+    .animate-pulse-subtle {
+      animation: pulseRing 4s ease-in-out infinite;
+    }
+
+    /* Custom Scrollbar Prevention inside slides on small screens */
+    .slide-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Interactive Toast Message */
+    #toast {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Right-Side Minimal Slide Navigation Indicator -->
+  <nav aria-label="Slide Navigation" class="fixed right-4 md:right-7 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3">
+    <button onclick="goToSlide(0)" data-nav="0" aria-label="Slide 1: About Me" class="nav-dot group relative flex items-center justify-center w-6 h-6 cursor-pointer focus:outline-none">
+      <span class="nav-label absolute right-8 px-2 py-0.5 rounded bg-ink text-white font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">01 ABOUT</span>
+      <span class="dot-core w-2 h-2 rounded-full transition-all duration-300 bg-white/50"></span>
+    </button>
+    <button onclick="goToSlide(1)" data-nav="1" aria-label="Slide 2: Producer Identity" class="nav-dot group relative flex items-center justify-center w-6 h-6 cursor-pointer focus:outline-none">
+      <span class="nav-label absolute right-8 px-2 py-0.5 rounded bg-ink text-white font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">02 IDENTITY</span>
+      <span class="dot-core w-2 h-2 rounded-full transition-all duration-300 bg-ink/30"></span>
+    </button>
+    <button onclick="goToSlide(2)" data-nav="2" aria-label="Slide 3: Target Analysis" class="nav-dot group relative flex items-center justify-center w-6 h-6 cursor-pointer focus:outline-none">
+      <span class="nav-label absolute right-8 px-2 py-0.5 rounded bg-ink text-white font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">03 SYNERGY</span>
+      <span class="dot-core w-2 h-2 rounded-full transition-all duration-300 bg-ink/30"></span>
+    </button>
+    <button onclick="goToSlide(3)" data-nav="3" aria-label="Slide 4: Process & Communication" class="nav-dot group relative flex items-center justify-center w-6 h-6 cursor-pointer focus:outline-none">
+      <span class="nav-label absolute right-8 px-2 py-0.5 rounded bg-ink text-white font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">04 PROCESS</span>
+      <span class="dot-core w-2 h-2 rounded-full transition-all duration-300 bg-ink/30"></span>
+    </button>
+    <button onclick="goToSlide(4)" data-nav="4" aria-label="Slide 5: Selected Works & Next" class="nav-dot group relative flex items-center justify-center w-6 h-6 cursor-pointer focus:outline-none">
+      <span class="nav-label absolute right-8 px-2 py-0.5 rounded bg-ink text-white font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">05 WORKS</span>
+      <span class="dot-core w-2 h-2 rounded-full transition-all duration-300 bg-ink/30"></span>
+    </button>
+  </nav>
+
+  <!-- Subtle Bottom-Right Keyboard Control Hint & Quick Prev/Next -->
+  <div id="hud-controls" class="fixed bottom-4 right-5 md:right-8 z-50 flex items-center gap-2 text-xs font-mono transition-colors duration-500 text-white/80">
+    <span id="slide-counter" class="tracking-widest mr-1 font-bold">01 / 05</span>
+    <button onclick="prevSlide()" aria-label="Previous Slide" class="w-7 h-7 rounded-md border border-current/25 flex items-center justify-center hover:bg-current/10 transition cursor-pointer">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+    </button>
+    <button onclick="nextSlide()" aria-label="Next Slide" class="w-7 h-7 rounded-md border border-current/25 flex items-center justify-center hover:bg-current/10 transition cursor-pointer">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+    <button id="fullscreen-btn" onclick="toggleFullscreen()" aria-label="Toggle Fullscreen" title="Toggle Fullscreen (F)" class="h-7 px-2.5 rounded-md border border-current/25 flex items-center gap-1.5 hover:bg-current/10 transition cursor-pointer ml-0.5">
+      <svg id="fs-icon-enter" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>
+      </svg>
+      <svg id="fs-icon-exit" class="w-3.5 h-3.5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>
+      </svg>
+      <span id="fs-label" class="text-[10px] font-bold tracking-wider uppercase">FULLSCREEN</span>
+    </button>
+    <span class="hidden md:inline-block ml-1 opacity-70 text-[11px]">↑ ↓ KEY</span>
+  </div>
+
+  <!-- Copy Notification Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-ink text-white text-xs font-mono tracking-wide shadow-lg opacity-0 translate-y-3 pointer-events-none">
+    Copied to clipboard
+  </div>
+
+  <!-- Main Vertical Presentation Track -->
+  <main id="deck-track">
+
+    <!-- ===================================================================== -->
+    <!-- SLIDE 1: COVER / ABOUT ME                                             -->
+    <!-- ===================================================================== -->
+    <section class="slide is-active bg-forest text-white" data-index="0" data-theme="dark">
+      <div class="slide-inner max-w-7xl mx-auto px-6 sm:px-12 md:px-16 py-7 md:py-11">
+        
+        <!-- Top Header Bar -->
+        <header class="w-full flex items-center gap-4 md:gap-6">
+          <div class="reveal-line flex-1 h-[2px] bg-white/85" style="--d: 80ms;"></div>
+          <!-- 4-point Sparkle Star inside Circle -->
+          <div class="reveal-scale shrink-0" style="--d: 180ms;">
+            <svg class="w-7 h-7 md:w-8 md:h-8 text-white" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M20 3C20.5 14 26 19.5 37 20C26 20.5 20.5 26 20 37C19.5 26 14 20.5 3 20C14 19.5 19.5 14 20 3Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="reveal font-tech font-bold text-lg md:text-2xl tracking-wider uppercase" style="--d: 260ms;">Portfolio</span>
+        </header>
+
+        <!-- Center Split Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center my-auto py-4">
+          
+          <!-- Left Column: Hollow "About me" + Diamond Lattice + Divider -->
+          <div class="lg:col-span-5 flex flex-col justify-center">
+            <h1 class="reveal text-outline-white text-6xl sm:text-7xl xl:text-[84px] mb-5 md:mb-7 select-none" style="--d: 220ms;">
+              About<br class="hidden lg:inline" /> me
+            </h1>
+
+            <!-- Diamond Lattice Graphic Pattern (2 rows of 4 diamonds) -->
+            <div class="reveal my-2" style="--d: 360ms;">
+              <svg class="w-36 sm:w-44 h-auto text-white" viewBox="0 0 160 80" fill="currentColor">
+                <!-- Top Row Diamonds -->
+                <polygon points="20,0 40,20 20,40 0,20"/>
+                <polygon points="60,0 80,20 60,40 40,20"/>
+                <polygon points="100,0 120,20 100,40 80,20"/>
+                <polygon points="140,0 160,20 140,40 120,20"/>
+                <!-- Bottom Row Diamonds -->
+                <polygon points="20,40 40,60 20,80 0,60"/>
+                <polygon points="60,40 80,60 60,80 40,60"/>
+                <polygon points="100,40 120,60 100,80 80,60"/>
+                <polygon points="140,40 160,60 140,80 120,60"/>
+              </svg>
+            </div>
+
+            <!-- Solid Horizontal Bar -->
+            <div class="reveal-line w-full max-w-xs h-[3px] bg-white mt-5 md:mt-7" style="--d: 480ms;"></div>
+          </div>
+
+          <!-- Right Column: Profile Icon + Bilingual Producer Bio -->
+          <div class="lg:col-span-7 flex flex-col justify-center space-y-5 md:space-y-6 lg:pl-6">
+            <!-- Minimal User Profile Outline Icon -->
+            <div class="reveal-scale" style="--d: 320ms;">
+              <svg class="w-10 h-10 md:w-12 md:h-12 text-white" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round">
+                <circle cx="24" cy="16" r="9"/>
+                <path d="M8 42C8 33.1634 15.1634 26 24 26C32.8366 26 40 33.1634 40 42"/>
+              </svg>
+            </div>
+
+            <!-- Korean Bio -->
+            <p class="reveal text-lg sm:text-xl md:text-2xl xl:text-[26px] font-bold leading-[1.48] tracking-tight text-white/95 break-keep" style="--d: 440ms;">
+              저는 해외 아티스트들과 협업하며 다져진 글로벌 사운드 감각과 실시간 소통 역량을 갖춘 프로듀서 <span class="underline decoration-white/50 underline-offset-4">WuTape</span>입니다.
+            </p>
+
+            <!-- English Bio -->
+            <p class="reveal font-slab text-sm sm:text-base md:text-lg leading-[1.6] text-white/85 font-bold" style="--d: 580ms;">
+              I am a producer who combines global sound sensibilities with real-time communication skills, shaped by working closely with international artists—I'm WuTape
+            </p>
+          </div>
+        </div>
+
+        <!-- Bottom Footer: Contact Details & Sparkle Ornament -->
+        <footer class="w-full flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-3 border-t border-white/15">
+          <div class="reveal font-slab text-xs sm:text-sm md:text-base space-y-1 text-white/90" style="--d: 680ms;">
+            <div class="flex items-center gap-2">
+              <span class="opacity-75">e-mail:</span>
+              <button onclick="copyText('tedotheoeuvre@gmail.com')" class="hover:underline cursor-pointer text-left font-bold" title="Click to copy email">
+                tedotheoeuvre@gmail.com
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="opacity-75">instagram:</span>
+              <a href="https://instagram.com/wutape" target="_blank" rel="noopener noreferrer" class="hover:underline font-bold">
+                @wutape
+              </a>
+            </div>
+          </div>
+
+          <!-- Framed 4-point Sparkle Ornament -->
+          <div class="reveal-scale hidden sm:flex items-center gap-3 self-end" style="--d: 760ms;">
+            <div class="w-9 h-9 border border-white/80 flex items-center justify-center p-1">
+              <svg class="w-full h-full text-white" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 1C16.5 11.5 20.5 15.5 31 16C20.5 16.5 16.5 20.5 16 31C15.5 20.5 11.5 16.5 1 16C11.5 15.5 15.5 11.5 16 1Z"/>
+              </svg>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- SLIDE 2: PRODUCER IDENTITY (WHO I AM)                                 -->
+    <!-- ===================================================================== -->
+    <section class="slide bg-paper text-ink" data-index="1" data-theme="light">
+      <div class="slide-inner max-w-7xl mx-auto px-6 sm:px-12 md:px-16 py-7 md:py-10">
+        
+        <!-- Top Header Bar with 12-Spoke Starburst -->
+        <div>
+          <header class="w-full flex items-center justify-between gap-4 mb-4 md:mb-6">
+            <div class="flex items-center gap-3 md:gap-5">
+              <!-- 12-spoke Starburst Graphic -->
+              <div class="reveal-scale shrink-0" style="--d: 80ms;">
+                <svg class="w-10 h-10 md:w-12 md:h-12 text-ink animate-spin-slow" viewBox="0 0 100 100" fill="currentColor">
+                  <rect x="45" y="2" width="10" height="96"/>
+                  <rect x="45" y="2" width="10" height="96" transform="rotate(30 50 50)"/>
+                  <rect x="45" y="2" width="10" height="96" transform="rotate(60 50 50)"/>
+                  <rect x="45" y="2" width="10" height="96" transform="rotate(90 50 50)"/>
+                  <rect x="45" y="2" width="10" height="96" transform="rotate(120 50 50)"/>
+                  <rect x="45" y="2" width="10" height="96" transform="rotate(150 50 50)"/>
+                </svg>
+              </div>
+              <span class="reveal font-tech font-bold text-base md:text-xl tracking-wider uppercase text-ink" style="--d: 140ms;">Portfolio</span>
+            </div>
+
+            <div class="reveal-line flex-1 h-[2px] bg-ink/80 mx-2 md:mx-6" style="--d: 200ms;"></div>
+
+            <div class="reveal-scale shrink-0" style="--d: 260ms;">
+              <svg class="w-7 h-7 md:w-8 md:h-8 text-ink" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M20 3C20.5 14 26 19.5 37 20C26 20.5 20.5 26 20 37C19.5 26 14 20.5 3 20C14 19.5 19.5 14 20 3Z" fill="currentColor"/>
+              </svg>
+            </div>
+          </header>
+
+          <!-- Main Section Title + Pill Badge -->
+          <div class="flex flex-wrap items-center gap-3 md:gap-5">
+            <h2 class="reveal text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-ink" style="--d: 240ms;">
+              Producer Identity
+            </h2>
+            <span class="reveal-scale inline-flex items-center px-5 py-1.5 rounded-full bg-ink text-white text-xs sm:text-sm md:text-base font-medium tracking-wide shadow-sm" style="--d: 340ms;">
+              Who I Am
+            </span>
+          </div>
+        </div>
+
+        <!-- 3-Column Feature Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 my-auto py-3">
+          
+          <!-- Card 01 -->
+          <article class="reveal bg-white rounded-3xl p-5 sm:p-6 md:p-7 border border-black/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1" style="--d: 380ms;">
+            <div>
+              <div class="font-condensed text-3xl md:text-4xl font-bold text-forest tracking-tight mb-2">01</div>
+              <h3 class="text-lg md:text-xl font-bold text-ink mb-3 pb-3 border-b border-black/10">실전 글로벌 협업력</h3>
+              <div class="space-y-3 text-xs sm:text-sm md:text-[15px] leading-relaxed text-ink/85 break-keep">
+                <p>북미 및 유럽 아티스트·프로듀서들과의 다수 앨범·싱글 협업 및 라이선싱 실무 경험 보유</p>
+                <p>통역이나 중개 없이 영어로 직접 소통하며 해외 현지 씬의 트렌드를 실시간으로 흡수·구현하는 실행력</p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 02 -->
+          <article class="reveal bg-white rounded-3xl p-5 sm:p-6 md:p-7 border border-black/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1" style="--d: 500ms;">
+            <div>
+              <div class="font-condensed text-3xl md:text-4xl font-bold text-forest tracking-tight mb-2">02</div>
+              <h3 class="text-lg md:text-xl font-bold text-ink mb-3 pb-3 border-b border-black/10">디렉팅 및 비주얼 감각</h3>
+              <div class="space-y-3 text-xs sm:text-sm md:text-[15px] leading-relaxed text-ink/85 break-keep">
+                <p>독립 영화 음악 작곡·디렉팅 및 협업 경험</p>
+                <p>곡의 기승전결과 비주얼 컨셉까지 함께 그리는 입체적 프로듀싱</p>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 03 -->
+          <article class="reveal bg-white rounded-3xl p-5 sm:p-6 md:p-7 border border-black/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1" style="--d: 620ms;">
+            <div>
+              <div class="font-condensed text-3xl md:text-4xl font-bold text-forest tracking-tight mb-2">03</div>
+              <h3 class="text-lg md:text-xl font-bold text-ink mb-3 pb-3 border-b border-black/10">소통 및 피드백 속도</h3>
+              <div class="space-y-3 text-xs sm:text-sm md:text-[15px] leading-relaxed text-ink/85 break-keep">
+                <p>초·중·고 대상 음악·디지털 미디어 워크숍을 직접 기획하고 이끌며, 서로 다른 배경의 상대와도 빠르게 합의점을 찾는 번역·설명력을 체득</p>
+                <p>레이블 협업 과정에서도 막연한 레퍼런스 공유만으로 작업 의도를 정확히 맞춰 피드백 속도와 수정 효율을 끌어올림</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Bottom Dark Forest Green Banner -->
+        <div class="reveal w-full rounded-2xl bg-forest-dark text-white py-3.5 md:py-4 px-6 text-center shadow-md" style="--d: 740ms;">
+          <p class="text-base sm:text-lg md:text-xl font-medium tracking-wide">
+            프로듀서 <span class="font-bold">WuTape</span>입니다.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- SLIDE 3: TARGET ANALYSIS (AT AREA x WUTAPE SYNERGY)                   -->
+    <!-- ===================================================================== -->
+    <section class="slide bg-white text-ink" data-index="2" data-theme="light">
+      <div class="slide-inner max-w-7xl mx-auto px-6 sm:px-12 md:px-16 py-7 md:py-10">
+        
+        <!-- Top Header -->
+        <div>
+          <header class="w-full flex items-center gap-4 md:gap-6 mb-3 md:mb-5">
+            <span class="reveal font-bold text-base md:text-xl tracking-tight text-ink" style="--d: 80ms;">WuTape</span>
+            <div class="reveal-line flex-1 h-[2px] bg-ink" style="--d: 160ms;"></div>
+            <span class="reveal font-bold text-base md:text-xl tracking-wider uppercase text-ink" style="--d: 240ms;">PORTFOLIO</span>
+          </header>
+
+          <!-- Giant Condensed Headline -->
+          <h2 class="reveal font-condensed text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-forest leading-none uppercase" style="--d: 260ms;">
+            Target Analysis
+          </h2>
+        </div>
+
+        <!-- Middle Two-Column Comparison + Venn Diagram -->
+        <div class="flex flex-col justify-center gap-4 md:gap-6 my-auto py-2">
+          
+          <!-- Two-Column Text Comparison -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
+            <!-- Left: AT AREA -->
+            <div class="reveal space-y-2.5" style="--d: 360ms;">
+              <h3 class="text-xl md:text-2xl font-extrabold tracking-tight text-ink">AT AREA</h3>
+              <ul class="space-y-1.5 text-xs sm:text-sm md:text-[15px] font-medium text-ink/85 leading-relaxed break-keep">
+                <li>그루비룸을 필두로 던, 제미나이 등 독보적 캐릭터의 아티스트 라인업 구축.</li>
+                <li>음악 뿐만 아니라 패션, 아트워크, 영상 비주얼도 하나의 브랜드처럼 설계.</li>
+              </ul>
+            </div>
+
+            <!-- Right: WuTape -->
+            <div class="reveal space-y-2.5" style="--d: 460ms;">
+              <h3 class="text-xl md:text-2xl font-extrabold tracking-tight text-ink">WuTape</h3>
+              <ul class="space-y-1.5 text-xs sm:text-sm md:text-[15px] font-medium text-ink/85 leading-relaxed break-keep">
+                <li>해외 아티스트들과 실전 협업 경험을 바탕으로 글로벌 청취층에 반응하는 사운드 제작</li>
+                <li>외부 해외 프로듀서, 탑라이너와의 원활한 co-writing 브릿지 역할</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Center Venn Diagram Graphic -->
+          <div class="reveal-scale flex items-center justify-center py-1" style="--d: 580ms;">
+            <div class="relative flex items-center justify-center">
+              <!-- Left Circle: AT AREA (Matte Black) -->
+              <div class="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full bg-ink text-white flex items-center justify-center pr-6 sm:pr-8 shadow-lg z-10">
+                <span class="font-bold text-base sm:text-lg md:text-xl tracking-wide">AT AREA</span>
+              </div>
+
+              <!-- Right Circle: WuTape (Deep Forest Green) -->
+              <div class="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full bg-forest text-white flex items-center justify-center pl-6 sm:pl-8 -ml-12 sm:-ml-14 md:-ml-16 shadow-lg z-10 mix-blend-normal">
+                <span class="font-bold text-base sm:text-lg md:text-xl tracking-wide">WuTape</span>
+              </div>
+
+              <!-- Center Intersection Highlight Lens (White Outline Circle) -->
+              <div class="pointer-events-none absolute w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full border-2 border-white/90 translate-x-[-3.5rem] sm:translate-x-[-4.25rem] md:translate-x-[-5rem] z-20 opacity-80"></div>
+              <div class="pointer-events-none absolute w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full border-2 border-white/90 translate-x-[3.5rem] sm:translate-x-[4.25rem] md:translate-x-[5rem] z-20 opacity-80"></div>
+              
+              <!-- Subtle Synergy Sparkle at Center -->
+              <div class="pointer-events-none absolute z-30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-white animate-pulse-subtle" viewBox="0 0 32 32" fill="currentColor">
+                  <path d="M16 2C16.5 11.5 20.5 15.5 30 16C20.5 16.5 16.5 20.5 16 30C15.5 20.5 11.5 16.5 2 16C11.5 15.5 15.5 11.5 16 2Z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Full-Width Synergy Summary Banner -->
+        <div class="reveal w-full rounded-2xl bg-forest-dark text-white py-3.5 md:py-4 px-5 text-center shadow-md" style="--d: 720ms;">
+          <p class="text-xs sm:text-sm md:text-lg font-bold tracking-tight break-keep">
+            AREA가 가진 독보적인 아티스트 캐릭터 위에 글로벌씬과 동기화 된 트렌디한 사운드를 더해 글로벌 파급력 극대화
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- SLIDE 4: PROCESS & COMMUNICATION                                      -->
+    <!-- ===================================================================== -->
+    <section class="slide bg-white text-ink" data-index="3" data-theme="light">
+      <div class="w-full h-full flex flex-col lg:flex-row">
+        
+        <!-- Left 30% Deep Forest Green Sidebar -->
+        <aside class="w-full lg:w-[29%] bg-forest-dark text-white px-6 sm:px-10 py-6 lg:py-12 flex flex-col justify-between shrink-0">
+          <div class="reveal" style="--d: 120ms;">
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight tracking-tight">
+              Process &amp;<br />Communication
+            </h2>
+          </div>
+
+          <!-- Two White-Outlined Rectangular Boxes -->
+          <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4 mt-4 lg:mt-0">
+            <div class="reveal border-2 border-white/85 px-4 py-3 lg:py-4 text-center font-bold text-xs sm:text-sm lg:text-base tracking-tight" style="--d: 320ms;">
+              해외 Co-Writing &amp; 영어 소통
+            </div>
+            <div class="reveal border-2 border-white/85 px-4 py-3 lg:py-4 text-center font-bold text-xs sm:text-sm lg:text-base tracking-tight" style="--d: 440ms;">
+              깔끔한 데이터 및 권리 정리
+            </div>
+          </div>
+        </aside>
+
+        <!-- Right 70% Main Workflow Area -->
+        <div class="flex-1 flex flex-col justify-between px-6 sm:px-10 lg:px-14 py-6 lg:py-10 overflow-hidden">
+          
+          <!-- Top Header + Subtitle -->
+          <div>
+            <header class="w-full flex items-center gap-4 mb-3 lg:mb-5">
+              <span class="reveal font-bold text-base md:text-xl tracking-tight text-ink" style="--d: 140ms;">WuTape</span>
+              <div class="reveal-line flex-1 h-[2px] bg-ink" style="--d: 220ms;"></div>
+              <span class="reveal font-bold text-base md:text-xl tracking-wider uppercase text-ink" style="--d: 300ms;">PORTFOLIO</span>
+            </header>
+
+            <h3 class="reveal text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-ink" style="--d: 340ms;">
+              작업 프로세스 및 커뮤니케이션
+            </h3>
+          </div>
+
+          <!-- 4-Column Workflow Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 my-auto py-3">
+            
+            <!-- Step 1 -->
+            <div class="reveal flex flex-col" style="--d: 420ms;">
+              <div class="w-full rounded-full border-[3.5px] border-forest-dark py-2.5 px-3 text-center font-extrabold text-sm lg:text-base text-ink mb-3 lg:mb-5 bg-white shadow-xs">
+                A&amp;R Briefing
+              </div>
+              <div class="space-y-3 text-xs sm:text-sm text-ink/80 leading-relaxed break-keep px-1">
+                <p>아티스트별 차기 앨범 컨셉 및 비주얼 레퍼런스 공유</p>
+                <p class="font-semibold text-ink">사운드 방향성 1:1 싱크</p>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="reveal flex flex-col" style="--d: 520ms;">
+              <div class="w-full rounded-full border-[3.5px] border-forest-dark py-2.5 px-3 text-center font-extrabold text-sm lg:text-base text-ink mb-3 lg:mb-5 bg-white shadow-xs">
+                Fast Demo Pitch
+              </div>
+              <div class="space-y-3 text-xs sm:text-sm text-ink/80 leading-relaxed break-keep px-1">
+                <p>브리핑 후 3-5일 이내 맞춤형 데모 2~3곡 제안</p>
+                <p class="font-semibold text-ink">발매 수준 러프믹스 제공</p>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="reveal flex flex-col" style="--d: 620ms;">
+              <div class="w-full rounded-full border-[3.5px] border-forest-dark py-2.5 px-3 text-center font-extrabold text-sm lg:text-base text-ink mb-3 lg:mb-5 bg-white shadow-xs">
+                Agile Revision
+              </div>
+              <div class="space-y-3 text-xs sm:text-sm text-ink/80 leading-relaxed break-keep px-1">
+                <p>A&amp;R 및 아티스트 피드백 즉각 반영</p>
+                <p class="font-semibold text-ink">송폼, 편곡 디테일 수정 및 보컬 조율</p>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="reveal flex flex-col" style="--d: 720ms;">
+              <div class="w-full rounded-full border-[3.5px] border-forest-dark py-2.5 px-3 text-center font-extrabold text-sm lg:text-base text-ink mb-3 lg:mb-5 bg-white shadow-xs">
+                Final Stems
+              </div>
+              <div class="space-y-3 text-xs sm:text-sm text-ink/80 leading-relaxed break-keep px-1">
+                <p>최종 사운드 밸런싱 완료</p>
+                <p class="font-semibold text-ink">클린 스템 및 트랙 아웃 정리 납품</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Full-Width Outlined Banner -->
+          <div class="reveal w-full border-2 border-ink py-3 lg:py-3.5 px-6 text-center bg-white" style="--d: 820ms;">
+            <p class="text-sm sm:text-base lg:text-lg font-extrabold tracking-tight text-ink">
+              빠른 턴어라운드 &amp; 직관적 해석
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================================================================== -->
+    <!-- SLIDE 5: SELECTED WORKS / OUTRO (WUTAPE NEXT)                         -->
+    <!-- ===================================================================== -->
+    <section class="slide bg-paper text-ink" data-index="4" data-theme="light">
+      <div class="slide-inner max-w-7xl mx-auto px-6 sm:px-12 md:px-16 py-7 md:py-10">
+        
+        <!-- Top Header -->
+        <header class="w-full flex items-center gap-4 md:gap-6">
+          <span class="reveal font-bold text-base md:text-xl tracking-tight text-ink" style="--d: 80ms;">WuTape</span>
+          <div class="reveal-line flex-1 h-[2px] bg-ink" style="--d: 160ms;"></div>
+          <span class="reveal font-bold text-base md:text-xl tracking-wider uppercase text-ink" style="--d: 240ms;">PORTFOLIO</span>
+        </header>
+
+        <!-- Editorial Bento Collage Grid with Center Focal Overlay -->
+        <div class="relative flex-1 my-4 md:my-6 grid grid-cols-12 grid-rows-6 gap-3 md:gap-4 max-h-[76vh]">
+          
+          <!-- Top-Left: Windswept Grass Field with Music Note Motif -->
+          <div class="reveal-scale col-span-5 md:col-span-4 row-span-3 relative rounded-sm overflow-hidden bg-[#2b3026] group shadow-sm" style="--d: 260ms;">
+            <!-- Generative Atmospheric Grass & Eighth Note SVG Artwork -->
+            <svg class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="skyMist" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#FFFFFF"/>
+                  <stop offset="42%" stop-color="#E8EAE2"/>
+                  <stop offset="100%" stop-color="#3C4630"/>
+                </linearGradient>
+              </defs>
+              <rect width="400" height="300" fill="url(#skyMist)"/>
+              <!-- Tall Grass Blades -->
+              <g stroke="#252D1E" stroke-width="2" opacity="0.75">
+                <path d="M10 300 Q30 190 65 130" fill="none"/>
+                <path d="M35 300 Q55 180 95 125" fill="none"/>
+                <path d="M65 300 Q90 200 130 140" fill="none"/>
+                <path d="M95 300 Q120 175 165 120" fill="none"/>
+                <path d="M130 300 Q150 210 190 150" fill="none"/>
+                <path d="M220 300 Q245 190 285 135" fill="none"/>
+                <path d="M260 300 Q285 170 330 115" fill="none"/>
+                <path d="M300 300 Q325 200 370 140" fill="none"/>
+                <path d="M340 300 Q365 185 400 130" fill="none"/>
+              </g>
+              <!-- Glowing White Oval & Musical Note Emblem -->
+              <ellipse cx="200" cy="165" rx="46" ry="118" fill="none" stroke="#FFFFFF" stroke-width="14" opacity="0.92"/>
+              <path d="M188 195 V125 L220 110 V180" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <ellipse cx="180" cy="198" rx="11" ry="16" transform="rotate(-18 180 198)" fill="#FFFFFF"/>
+              <ellipse cx="212" cy="183" rx="11" ry="16" transform="rotate(-18 212 183)" fill="#FFFFFF"/>
+            </svg>
+          </div>
+
+          <!-- Top-Center: Monochrome Soundwave & Concentric Frequency Rings -->
+          <div class="reveal-scale col-span-4 md:col-span-4 row-span-3 relative rounded-sm overflow-hidden bg-white border border-black/10 group shadow-sm" style="--d: 360ms;">
+            <svg class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+              <rect width="400" height="300" fill="#FAFAFA"/>
+              <!-- Concentric Resonance Circles -->
+              <g fill="none" stroke="#111111" opacity="0.28">
+                <circle cx="195" cy="150" r="35" stroke-width="1"/>
+                <circle cx="195" cy="150" r="65" stroke-width="1.2"/>
+                <circle cx="195" cy="150" r="95" stroke-width="0.9"/>
+                <circle cx="195" cy="150" r="128" stroke-width="1.3"/>
+                <circle cx="195" cy="150" r="160" stroke-width="0.7"/>
+                <circle cx="315" cy="150" r="55" stroke-width="0.8"/>
+                <circle cx="80" cy="150" r="65" stroke-width="0.8"/>
+              </g>
+              <!-- Vertical Frequency Transient Spike -->
+              <line x1="205" y1="0" x2="205" y2="300" stroke="#111111" stroke-width="1.5" opacity="0.45"/>
+              <line x1="210" y1="0" x2="210" y2="300" stroke="#111111" stroke-width="0.8" opacity="0.3"/>
+              <!-- Audio Waveform Silhouette -->
+              <path d="M15 150 L45 147 L65 138 L85 145 L105 125 L125 142 L140 105 L155 135 L168 62 L180 130 L195 95 L208 45 L220 132 L238 112 L255 140 L275 135 L305 146 L335 128 L355 145 L385 150 L355 156 L335 172 L305 154 L275 162 L255 158 L238 182 L220 165 L208 255 L195 198 L180 168 L168 238 L155 164 L140 192 L125 158 L105 174 L85 155 L65 160 L45 153 Z" fill="#111111"/>
+            </svg>
+          </div>
+
+          <!-- Top-Right: Matte Charcoal Block -->
+          <div class="reveal-scale col-span-3 md:col-span-4 row-span-3 bg-ink-charcoal rounded-sm p-4 md:p-6 flex flex-col justify-between text-white shadow-sm" style="--d: 460ms;">
+            <span class="font-mono text-[10px] md:text-xs tracking-widest uppercase text-white/50">ARCHIVE // 2026</span>
+            <p class="font-tech text-xs md:text-sm text-white/80 leading-relaxed hidden sm:block">
+              Global Sound Sensibilities &amp; Direct Creative Direction.
+            </p>
+          </div>
+
+          <!-- Bottom-Left: Surreal Pathway & Floating Orbs Artwork -->
+          <div class="reveal-scale col-span-4 md:col-span-3 row-span-3 relative rounded-sm overflow-hidden bg-[#d8d9d4] group shadow-sm" style="--d: 520ms;">
+            <svg class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" viewBox="0 0 320 300" preserveAspectRatio="xMidYMid slice">
+              <rect width="320" height="300" fill="#F4F4F2"/>
+              <!-- Perspective Wall & Path -->
+              <polygon points="0,110 195,155 195,175 0,260" fill="#4A4D45"/>
+              <polygon points="0,155 195,170 195,180 0,275" fill="#2A3323"/>
+              <polygon points="0,275 195,180 320,225 320,300 0,300" fill="#7D7B74"/>
+              <!-- Abstract Ribbon & Floating Spheres -->
+              <path d="M120 0 Q145 140 195 165 Q230 180 215 220 L320 225 L320 0 Z" fill="#FFFFFF"/>
+              <circle cx="235" cy="95" r="8" fill="#63665E"/>
+              <circle cx="265" cy="175" r="6" fill="#63665E"/>
+              <path d="M215 145 C235 125, 255 165, 270 145" fill="none" stroke="#55534C" stroke-width="3"/>
+            </svg>
+          </div>
+
+          <!-- Bottom-Center: Warm Taupe Gray Block -->
+          <div class="reveal-scale col-span-4 md:col-span-5 row-span-3 bg-ink-taupe rounded-sm p-4 md:p-6 flex flex-col justify-end text-white shadow-sm" style="--d: 600ms;">
+            <div class="font-mono text-[10px] md:text-xs tracking-widest uppercase text-white/85">
+              SEOUL — NORTH AMERICA — EUROPE
+            </div>
+          </div>
+
+          <!-- Bottom-Right: Fibonacci Spiral Editorial Portrait Composition -->
+          <div class="reveal-scale col-span-4 md:col-span-4 row-span-3 relative rounded-sm overflow-hidden bg-[#3a3a38] group shadow-sm" style="--d: 680ms;">
+            <svg class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+              <rect width="400" height="300" fill="#52524E"/>
+              <!-- Cobblestone Ground -->
+              <rect x="0" y="195" width="400" height="105" fill="#3B3B39"/>
+              <g stroke="#262624" stroke-width="1.5" opacity="0.6">
+                <line x1="0" y1="220" x2="400" y2="220"/>
+                <line x1="0" y1="248" x2="400" y2="248"/>
+                <line x1="0" y1="276" x2="400" y2="276"/>
+                <line x1="80" y1="195" x2="55" y2="300"/>
+                <line x1="160" y1="195" x2="145" y2="300"/>
+                <line x1="240" y1="195" x2="245" y2="300"/>
+                <line x1="320" y1="195" x2="345" y2="300"/>
+              </g>
+              <!-- Minimal Silhouette Figure -->
+              <circle cx="170" cy="95" r="22" fill="#181818"/>
+              <path d="M148 115 Q120 155 135 195 L195 195 Q205 165 182 145 L245 165" fill="none" stroke="#181818" stroke-width="18" stroke-linecap="round"/>
+              <!-- Golden Ratio Fibonacci Grid & Spiral Overlay -->
+              <g fill="none" stroke="#EAEAE6" stroke-width="1.6" opacity="0.85">
+                <rect x="105" y="55" width="230" height="142"/>
+                <line x1="247" y1="55" x2="247" y2="197"/>
+                <line x1="105" y1="143" x2="247" y2="143"/>
+                <rect x="193" y="143" width="54" height="54"/>
+                <path d="M335 197 A142 142 0 0 0 193 55 A88 88 0 0 0 105 143 A54 54 0 0 0 159 197 A34 34 0 0 0 193 163"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- CENTER FOCAL OVERLAY: "WUTAPE" + "NEXT" Interactive Badge -->
+          <div class="reveal-scale pointer-events-none absolute inset-0 flex items-center justify-center z-30" style="--d: 780ms;">
+            <div class="pointer-events-auto flex flex-col sm:flex-row items-stretch shadow-2xl border border-black/15">
+              <!-- Dark Block: WUTAPE -->
+              <div class="bg-ink-charcoal text-white px-7 sm:px-9 py-4 sm:py-5 flex items-center justify-center">
+                <span class="font-condensed text-4xl sm:text-5xl md:text-6xl font-bold tracking-wider uppercase leading-none">
+                  WUTAPE
+                </span>
+              </div>
+              <!-- Light Block: NEXT (Clickable to restart or contact) -->
+              <button onclick="goToSlide(0)" title="Back to Cover (Slide 1)" class="bg-white hover:bg-forest hover:text-white text-ink-charcoal px-7 sm:px-9 py-4 sm:py-5 flex items-center justify-center gap-2 transition-colors duration-300 cursor-pointer group">
+                <span class="font-condensed text-4xl sm:text-5xl md:text-6xl font-bold tracking-wider uppercase leading-none">
+                  NEXT
+                </span>
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 opacity-60 group-hover:opacity-100 group-hover:-translate-y-0.5 transition-all" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Subtle Bottom Bar -->
+        <footer class="reveal w-full flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-ink/70 pt-1" style="--d: 860ms;">
+          <span>PRODUCER PORTFOLIO — WUTAPE</span>
+          <div class="flex items-center gap-4">
+            <button onclick="copyText('tedotheoeuvre@gmail.com')" class="hover:text-ink hover:underline cursor-pointer">tedotheoeuvre@gmail.com</button>
+            <a href="https://instagram.com/wutape" target="_blank" rel="noopener noreferrer" class="hover:text-ink hover:underline">@wutape</a>
+          </div>
+        </footer>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /**
+     * WuTape Portfolio Full-Page Slide Presentation Controller
+     * Handles keyboard Up/Down arrows, debounced mouse wheel, touch swipes,
+     * and triggers staggered CSS entrance animations per active slide.
+     */
+    const deckTrack = document.getElementById('deck-track');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const navDots = Array.from(document.querySelectorAll('.nav-dot'));
+    const slideCounter = document.getElementById('slide-counter');
+    const hudControls = document.getElementById('hud-controls');
+    const toast = document.getElementById('toast');
+
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+    let isAnimating = false;
+    const transitionCooldown = 850; // Matches CSS cubic-bezier transition duration
+
+    /**
+     * Navigate to a specific slide index with smooth transition & element stagger reset
+     * @param {number} index - Target slide index (0 to totalSlides - 1)
+     */
+    function goToSlide(index) {
+      if (index < 0 || index >= totalSlides || index === currentSlide || isAnimating) {
+        return;
+      }
+
+      isAnimating = true;
+      currentSlide = index;
+
+      // Translate vertical track
+      deckTrack.style.transform = `translateY(-${currentSlide * 100}vh)`;
+
+      // Toggle 'is-active' class so staggered elements animate in on entry and reset on exit
+      slides.forEach((slide, i) => {
+        if (i === currentSlide) {
+          // Small frame delay ensures browser registers initial hidden state if re-entering rapidly
+          requestAnimationFrame(() => {
+            slide.classList.add('is-active');
+          });
+        } else {
+          slide.classList.remove('is-active');
+        }
+      });
+
+      updateHUD();
+
+      setTimeout(() => {
+        isAnimating = false;
+      }, transitionCooldown);
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    /**
+     * Update navigation dots, slide counter, and HUD theme contrast
+     */
+    function updateHUD() {
+      const activeTheme = slides[currentSlide].dataset.theme;
+      const isDark = activeTheme === 'dark';
+
+      // Update numeric counter (e.g., "01 / 05")
+      slideCounter.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+
+      // Adapt bottom-right HUD color to dark/light background
+      if (isDark) {
+        hudControls.classList.remove('text-ink/80');
+        hudControls.classList.add('text-white/80');
+      } else {
+        hudControls.classList.remove('text-white/80');
+        hudControls.classList.add('text-ink/80');
+      }
+
+      // Update right-side indicator dots
+      navDots.forEach((btn, idx) => {
+        const core = btn.querySelector('.dot-core');
+        const isCurrent = idx === currentSlide;
+
+        core.className = 'dot-core rounded-full transition-all duration-300';
+
+        if (isCurrent) {
+          core.classList.add('w-2.5', 'h-2.5', 'scale-125', isDark ? 'bg-white' : 'bg-forest');
+        } else {
+          core.classList.add('w-2', 'h-2', isDark ? 'bg-white/40' : 'bg-ink/25');
+        }
+      });
+    }
+
+    // 1. Keyboard Up/Down Arrow Navigation & Fullscreen Shortcut
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides - 1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          toggleFullscreen();
+        }
+      }
+    });
+
+    // Fullscreen API Toggle & State Sync
+    const fsIconEnter = document.getElementById('fs-icon-enter');
+    const fsIconExit = document.getElementById('fs-icon-exit');
+    const fsLabel = document.getElementById('fs-label');
+
+    async function toggleFullscreen() {
+      try {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const el = document.documentElement;
+          if (el.requestFullscreen) {
+            await el.requestFullscreen();
+          } else if (el.webkitRequestFullscreen) {
+            await el.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            await document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            await document.webkitExitFullscreen();
+          }
+        }
+      } catch (err) {
+        showToast('Fullscreen blocked by browser or embed frame');
+      }
+    }
+
+    function syncFullscreenUI() {
+      const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      if (isFs) {
+        fsIconEnter.classList.add('hidden');
+        fsIconExit.classList.remove('hidden');
+        fsLabel.textContent = 'EXIT FULLSCREEN';
+      } else {
+        fsIconEnter.classList.remove('hidden');
+        fsIconExit.classList.add('hidden');
+        fsLabel.textContent = 'FULLSCREEN';
+      }
+    }
+
+    document.addEventListener('fullscreenchange', syncFullscreenUI);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenUI);
+
+    // 2. Mouse Wheel / Trackpad Scroll Navigation (Debounced)
+    let wheelLock = false;
+    window.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (wheelLock || isAnimating) return;
+
+      if (Math.abs(e.deltaY) > 20) {
+        wheelLock = true;
+        if (e.deltaY > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+        setTimeout(() => {
+          wheelLock = false;
+        }, 900);
+      }
+    }, { passive: false });
+
+    // 3. Touch Swipe Navigation for Mobile/Tablet
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffY = touchStartY - touchEndY;
+
+      if (Math.abs(diffY) > 45) {
+        if (diffY > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+      }
+    }, { passive: true });
+
+    // 4. Copy Email Helper (Using execCommand fallback for iframe compatibility)
+    let toastTimer = null;
+    function copyText(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast(`Copied: ${text}`);
+      } catch (err) {
+        showToast(text);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.remove('opacity-0', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-3');
+      }, 2200);
+    }
+
+    // Initialize initial state on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateHUD();
+      // Ensure first slide animations trigger cleanly on load
+      slides[0].classList.remove('is-active');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          slides[0].classList.add('is-active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
